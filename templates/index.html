@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Cleaner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #eef2ff;
+    --bg2: #f8f6ff;
+    --clay-shadow: 6px 6px 0px;
+    --radius: 22px;
+    --radius-sm: 14px;
+    --font: 'Nunito', sans-serif;
+    --purple: #7c5cbf;
+    --purple-light: #f0ebff;
+    --purple-border: #c9b8f0;
+    --purple-shadow: #b8a0e0;
+    --green: #27a05a;
+    --green-light: #e8fff2;
+    --green-border: #90d8b0;
+    --green-shadow: #78c898;
+    --red: #c0392b;
+    --red-light: #fff0f0;
+    --red-border: #f0a8a8;
+    --red-shadow: #e09090;
+    --amber: #b07820;
+    --amber-light: #fffbf0;
+    --amber-border: #f0d890;
+    --amber-shadow: #e0c070;
+    --blue: #2563a0;
+    --blue-light: #eef4ff;
+    --blue-border: #a8c8f0;
+    --blue-shadow: #90b0e0;
+    --text: #2a1860;
+    --text2: #7060a0;
+    --text3: #a898c8;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 20%, #ddd0ff55 0%, transparent 50%),
+      radial-gradient(circle at 85% 80%, #ffd0e855 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, #d0f0e055 0%, transparent 60%);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 28px 24px 60px;
+  }
+
+  /* ── CLAY CARD BASE ── */
+  .clay {
+    background: white;
+    border-radius: var(--radius);
+    border: 2.5px solid var(--purple-border);
+    box-shadow: var(--clay-shadow) var(--purple-shadow);
+  }
+  .clay-green  { background: var(--green-light);  border: 2.5px solid var(--green-border);  box-shadow: var(--clay-shadow) var(--green-shadow);  border-radius: var(--radius); }
+  .clay-red    { background: var(--red-light);    border: 2.5px solid var(--red-border);    box-shadow: var(--clay-shadow) var(--red-shadow);    border-radius: var(--radius); }
+  .clay-amber  { background: var(--amber-light);  border: 2.5px solid var(--amber-border);  box-shadow: var(--clay-shadow) var(--amber-shadow);  border-radius: var(--radius); }
+  .clay-blue   { background: var(--blue-light);   border: 2.5px solid var(--blue-border);   box-shadow: var(--clay-shadow) var(--blue-shadow);   border-radius: var(--radius); }
+  .clay-purple { background: var(--purple-light); border: 2.5px solid var(--purple-border); box-shadow: var(--clay-shadow) var(--purple-shadow); border-radius: var(--radius); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: var(--font);
+    font-weight: 800;
+    font-size: 13px;
+    border-radius: 14px;
+    border: 2.5px solid;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-decoration: none;
+  }
+  .btn:active { transform: translate(3px, 3px) !important; box-shadow: 0 0 0 !important; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  .btn-purple { background: var(--purple-light); color: var(--purple); border-color: var(--purple-border); box-shadow: 4px 4px 0 var(--purple-shadow); }
+  .btn-purple:hover { background: #e5d8ff; }
+  .btn-green  { background: var(--green-light);  color: var(--green);  border-color: var(--green-border);  box-shadow: 4px 4px 0 var(--green-shadow);  }
+  .btn-green:hover  { background: #d0ffe8; }
+  .btn-red    { background: var(--red-light);    color: var(--red);    border-color: var(--red-border);    box-shadow: 4px 4px 0 var(--red-shadow);    }
+  .btn-red:hover    { background: #ffe0e0; }
+  .btn-amber  { background: var(--amber-light);  color: var(--amber);  border-color: var(--amber-border);  box-shadow: 4px 4px 0 var(--amber-shadow);  }
+  .btn-amber:hover  { background: #fff0c8; }
+  .btn-blue   { background: var(--blue-light);   color: var(--blue);   border-color: var(--blue-border);   box-shadow: 4px 4px 0 var(--blue-shadow);   }
+  .btn-blue:hover   { background: #e0eeff; }
+
+  /* ── PROGRESS BARS ── */
+  .bar-bg {
+    height: 13px;
+    border-radius: 99px;
+    background: #e8e0f8;
+    border: 1.5px solid #d0c0f0;
+    overflow: hidden;
+    box-shadow: inset 2px 2px 4px rgba(140,100,200,.12);
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── LAYOUT ── */
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; flex-wrap: wrap; gap: 12px; }
+  .title  { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
+  .subtitle { font-size: 13px; color: var(--text2); font-weight: 600; margin-top: 3px; }
+
+  .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
+  @media (max-width: 900px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid-4, .grid-2 { grid-template-columns: 1fr; } }
+
+  .stat-card { padding: 20px 22px; }
+  .stat-label { font-size: 12px; font-weight: 700; opacity: .55; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .stat-val   { font-size: 30px; font-weight: 900; line-height: 1; margin-bottom: 10px; }
+
+  /* ── CLEAN ROWS ── */
+  .clean-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 18px; border-radius: 16px; margin-bottom: 9px;
+    border: 2px solid; transition: transform .1s, opacity .3s;
+    background: white;
+  }
+  .clean-row:hover { transform: translateY(-1px); }
+  .clean-row.done  { opacity: .4; }
+  .clean-row.done .row-label { text-decoration: line-through; }
+
+  .row-info    { flex: 1; }
+  .row-label   { font-weight: 800; font-size: 14px; color: var(--text); }
+  .row-size    { font-size: 12px; color: var(--text3); margin-top: 2px; font-weight: 600; }
+  .row-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 99px;
+    font-size: 11px; font-weight: 800; white-space: nowrap;
+  }
+  .badge-safe   { background: var(--green-light);  color: var(--green);  border: 1.5px solid var(--green-border); }
+  .badge-warn   { background: var(--amber-light);  color: var(--amber);  border: 1.5px solid var(--amber-border); }
+
+  /* ── LOG ── */
+  .log-panel  { padding: 16px; max-height: 260px; overflow-y: auto; }
+  .log-entry  {
+    font-family: 'Menlo', 'Monaco', monospace; font-size: 12px;
+    padding: 5px 0; border-bottom: 1px dashed #e8e0f8;
+    display: flex; align-items: flex-start; gap: 8px;
+    animation: fadeIn .25s ease;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+  .log-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:3px; }
+  .log-time { color: var(--text3); min-width: 68px; }
+  .log-msg  { color: var(--text2); }
+
+  /* ── PROCESSES ── */
+  .proc-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .proc-card  {
+    border-radius: 16px; padding: 12px 14px; cursor: pointer;
+    border: 2px solid; transition: transform .1s;
+    position: relative;
+  }
+  .proc-card:hover { transform: translateY(-1px); }
+  .proc-card.selected { outline: 3px solid #a080f0; outline-offset: 1px; }
+  .proc-card.dead { opacity: .35; pointer-events: none; }
+  .proc-name  { font-weight: 800; font-size: 13px; margin-bottom: 5px; }
+  .proc-meta  { font-size: 12px; opacity: .65; font-weight: 600; }
+
+  /* ── CHART ── */
+  .chart-wrap { padding: 18px; }
+
+  /* ── SECTION TITLE ── */
+  .sec-title  { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+
+  /* ── SPINNER ── */
+  .spin { display: inline-block; animation: rot .7s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: white; border: 2.5px solid var(--green-border);
+    border-radius: 16px; box-shadow: 4px 4px 0 var(--green-shadow);
+    padding: 12px 22px; font-weight: 700; font-size: 14px; color: var(--green);
+    transform: translateY(80px); opacity: 0;
+    transition: transform .3s, opacity .3s;
+    z-index: 100;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── DONUT LEGEND ── */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 12px; font-weight: 700; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="title">🧹 Dev Cleaner</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;">
+      <span id="os-badge" style="font-size:11px;font-weight:800;padding:2px 10px;border-radius:99px;
+        background:#f0ebff;color:#5030b0;border:1.5px solid #c9b8f0;">Détection OS...</span>
+      <div class="subtitle" id="last-scan">Jamais scanné · cliquer sur Scanner</div>
+    </div>
+  </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="btn btn-purple" onclick="runScan()" id="scan-btn">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Scanner
+    </button>
+    <button class="btn btn-red" onclick="cleanAll()" id="clean-all-btn">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+      Tout nettoyer
+    </button>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="grid-4" id="stat-cards">
+  <!-- Disque -->
+  <div class="clay stat-card">
+    <div class="stat-label" style="color:var(--purple)">Disque libre</div>
+    <div class="stat-val" style="color:var(--text)" id="disk-free">—</div>
+    <div class="bar-bg"><div class="bar-fill" id="disk-bar" style="background:linear-gradient(90deg,#a87ae8,#c87ad8); width:0%"></div></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:5px;font-weight:600;" id="disk-info">—</div>
+  </div>
+  <!-- RAM -->
+  <div class="clay-pink stat-card" style="background:#fff0f8;border:2.5px solid #f0b8d8;box-shadow:6px 6px 0 #e0a0c8;">
+    <div class="stat-label" style="color:#b04080;">RAM utilisée</div>
+    <div class="stat-val" style="color:#7a1040;" id="ram-used">—</div>
+    <div class="bar-bg" style="background:#f8d8e8;border-color:#e8b8cc;"><div class="bar-fill" id="ram-bar" style="background:linear-gradient(90deg,#e878b0,#f878c8); width:0%"></div></div>
+    <div style="font-size:11px;color:#c06090;margin-top:5px;font-weight:600;" id="ram-info">—</div>
+  </div>
+  <!-- CPU -->
+  <div class="clay-blue stat-card">
+    <div class="stat-label" style="color:var(--blue)">CPU</div>
+    <div class="stat-val" style="color:#0a2870;" id="cpu-val">—</div>
+    <div class="bar-bg" style="background:#d8e8f8;border-color:#a0c0e8;"><div class="bar-fill" id="cpu-bar" style="background:linear-gradient(90deg,#60a8e8,#60c8f8); width:0%"></div></div>
+    <div style="font-size:11px;color:#5080c0;margin-top:5px;font-weight:600;">Charge processeur</div>
+  </div>
+  <!-- À nettoyer -->
+  <div class="clay-green stat-card">
+    <div class="stat-label" style="color:var(--green)">Récupérable</div>
+    <div class="stat-val" style="color:#0a4828;" id="to-clean">—</div>
+    <div class="bar-bg" style="background:#d0f0e0;border-color:#90d0b0;"><div class="bar-fill" id="clean-bar" style="background:linear-gradient(90deg,#4ac880,#4ae8a0); width:0%"></div></div>
+    <div style="font-size:11px;color:var(--green);margin-top:5px;font-weight:600;" id="clean-info">Lance un scan</div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="grid-2">
+
+  <!-- CLEAN ROWS -->
+  <div>
+    <div class="sec-title">Nettoyage par catégorie</div>
+    <div id="clean-rows">
+      <div style="color:var(--text3);font-size:13px;font-weight:600;padding:20px 0;text-align:center;">
+        Lance un scan pour voir les tailles réelles ↑
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-amber" onclick="location.reload()" style="flex:1;justify-content:center;">
+        ↺ Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+    <!-- DONUT CHART -->
+    <div class="sec-title">Répartition du disque</div>
+    <div class="clay chart-wrap" style="margin-bottom:16px;">
+      <div style="position:relative;height:220px;"><canvas id="diskChart"></canvas></div>
+      <div class="legend" id="disk-legend"></div>
+    </div>
+
+    <!-- LOG -->
+    <div class="sec-title">Journal</div>
+    <div class="clay log-panel" id="log-panel">
+      <div class="log-entry">
+        <div class="log-dot" style="background:#c0a8f0;animation:pulse 2s infinite;"></div>
+        <span class="log-time">--:--:--</span>
+        <span class="log-msg">En attente d'un scan...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROCESSES -->
+<div class="clay" style="padding:20px 22px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+    <div class="sec-title" style="margin:0;">Processus actifs — top RAM</div>
+    <button class="btn btn-amber" onclick="killSelected()" style="font-size:12px;padding:7px 16px;">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      Arrêter la sélection
+    </button>
+  </div>
+  <div class="proc-grid" id="proc-grid">
+    <div style="color:var(--text3);font-size:13px;font-weight:600;">Lance un scan pour voir les processus</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<style>@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }</style>
+
+<script>
+const API = '';
+let scanData = {};
+let selectedPIDs = new Set();
+let diskChart = null;
+
+function saveScanState(sys, scan) {
+  try { localStorage.setItem('mdc_scan', JSON.stringify({ sys, scan, time: now() })); } catch(_) {}
+}
+function loadScanState() {
+  try { return JSON.parse(localStorage.getItem('mdc_scan')); } catch(_) { return null; }
+}
+
+const COLORS_MAP = {
+  purple: { bg:'#f0ebff', border:'#c9b8f0', text:'#5030b0', btnClass:'btn-purple' },
+  green:  { bg:'#e8fff2', border:'#90d8b0', text:'#1a7a40', btnClass:'btn-green'  },
+  blue:   { bg:'#eef4ff', border:'#a8c8f0', text:'#1040a0', btnClass:'btn-blue'   },
+  amber:  { bg:'#fffbf0', border:'#f0d890', text:'#8a5000', btnClass:'btn-amber'  },
+  red:    { bg:'#fff0f0', border:'#f0a8a8', text:'#b02020', btnClass:'btn-red'    },
+};
+
+const CHART_COLORS = ['#e87898','#f0b860','#60c890','#78a8f8','#c890f0','#f0d060','#a0c8e0','#f0a070','#80d0a0'];
+
+function now() {
+  return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+function log(msg, type='info') {
+  const panel = document.getElementById('log-panel');
+  const colors = { success:'#40c870', warn:'#e0a830', error:'#e04040', info:'#a080f0' };
+  if (panel.querySelector('.log-entry')?.textContent.includes('attente')) panel.innerHTML = '';
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.innerHTML = `<div class="log-dot" style="background:${colors[type]||colors.info}"></div>
+    <span class="log-time">${now()}</span>
+    <span class="log-msg">${msg}</span>`;
+  panel.appendChild(el);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function human(bytes) {
+  if (bytes < 1024) return bytes + ' o';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' Ko';
+  if (bytes < 1024*1024*1024) return (bytes/1024/1024).toFixed(1) + ' Mo';
+  return (bytes/1024/1024/1024).toFixed(2) + ' Go';
+}
+
+// ── SCAN ──────────────────────────────────────────────────────────────────────
+async function runScan() {
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">◌</span> Scan...`;
+  log('Scan du système en cours...', 'info');
+
+  try {
+    const [sysRes, scanRes] = await Promise.all([
+      fetch(API + '/api/system'),
+      fetch(API + '/api/scan'),
+    ]);
+    const sys  = await sysRes.json();
+    scanData   = await scanRes.json();
+
+    updateSysCards(sys);
+    renderCleanRows(scanData);
+    renderProcesses(sys.processes);
+    renderDiskChart(sys.disk, scanData);
+
+    const total = Object.values(scanData).reduce((s, v) => s + (v.size_bytes || 0), 0);
+    document.getElementById('to-clean').textContent = human(total);
+    document.getElementById('clean-info').textContent = 'identifiés à nettoyer';
+    document.getElementById('clean-bar').style.width = Math.min(100, total / (sys.disk.total_gb * 1e9) * 100 * 8) + '%';
+    document.getElementById('last-scan').textContent = `Dernier scan : ${now()}`;
+    log('Scan terminé — ' + human(total) + ' récupérables', 'success');
+    saveScanState(sys, scanData);
+  } catch(e) {
+    log('Erreur de connexion : ' + e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Scanner`;
+}
+
+function updateSysCards(sys) {
+  document.getElementById('disk-free').textContent = sys.disk.free_gb + ' Go';
+  document.getElementById('disk-info').textContent = `sur ${sys.disk.total_gb} Go total (${sys.disk.percent}% utilisé)`;
+  document.getElementById('disk-bar').style.width = sys.disk.percent + '%';
+
+  document.getElementById('ram-used').textContent = sys.ram.used_gb + ' Go';
+  document.getElementById('ram-info').textContent = `sur ${sys.ram.total_gb} Go total`;
+  document.getElementById('ram-bar').style.width = sys.ram.percent + '%';
+
+  document.getElementById('cpu-val').textContent = sys.cpu + '%';
+  document.getElementById('cpu-bar').style.width = sys.cpu + '%';
+}
+
+// ── CLEAN ROWS ────────────────────────────────────────────────────────────────
+function renderCleanRows(data) {
+  const container = document.getElementById('clean-rows');
+  container.innerHTML = '';
+  Object.entries(data).forEach(([key, val]) => {
+    const c = COLORS_MAP[val.color] || COLORS_MAP.purple;
+    const div = document.createElement('div');
+    div.className = 'clean-row';
+    div.id = 'row-' + key;
+    div.style.cssText = `background:${c.bg};border-color:${c.border};`;
+    div.innerHTML = `
+      <div class="row-info">
+        <div class="row-label" style="color:${c.text}">${val.label}</div>
+        <div class="row-size">${val.size_human || 'via commande'}</div>
+      </div>
+      <div class="row-actions">
+        <span class="badge ${val.safe ? 'badge-safe' : 'badge-warn'}">${val.safe ? 'sûr' : 'confirmer'}</span>
+        <button class="btn ${c.btnClass}" style="padding:7px 14px;font-size:12px;"
+          onclick="cleanItem('${key}', this)">Nettoyer</button>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+async function cleanItem(key, btn) {
+  if (btn.disabled) return;
+  if (!scanData[key]?.safe && !confirm(`Nettoyer "${scanData[key]?.label}" ?\nCela supprime des fichiers de projets.`)) return;
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">⟳</span>`;
+  log(`Nettoyage de ${scanData[key]?.label}...`, 'info');
+
+  try {
+    const res = await fetch(API + '/api/clean/' + key);
+    const data = await res.json();
+    const row = document.getElementById('row-' + key);
+    row.classList.add('done');
+    btn.innerHTML = '✓';
+    data.log.forEach(l => log(l, l.includes('Erreur') ? 'error' : 'success'));
+    if (data.freed_bytes > 0) toast(`✓ ${data.freed_human} libérés`);
+  } catch(e) {
+    log('Erreur : ' + e.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = 'Nettoyer';
+  }
+}
+
+async function cleanAll() {
+  if (!confirm('Nettoyer toutes les cibles sûres ?')) return;
+  const btn = document.getElementById('clean-all-btn');
+  btn.disabled = true;
+  log('Nettoyage complet lancé...', 'info');
+
+  for (const [key, val] of Object.entries(scanData)) {
+    if (!val.safe) continue;
+    const rowBtn = document.querySelector(`#row-${key} button`);
+    if (rowBtn && !rowBtn.disabled) await cleanItem(key, rowBtn);
+  }
+
+  btn.disabled = false;
+  toast('Nettoyage complet terminé !');
+}
+
+// ── PROCESSES ─────────────────────────────────────────────────────────────────
+const PROC_COLORS = [
+  { bg:'#f0ebff', border:'#c9b8f0', text:'#5030b0' },
+  { bg:'#e8fff2', border:'#90d8b0', text:'#1a7a40' },
+  { bg:'#eef4ff', border:'#a8c8f0', text:'#1040a0' },
+  { bg:'#fffbf0', border:'#f0d890', text:'#8a5000' },
+  { bg:'#fff0f8', border:'#f0b8d8', text:'#90204a' },
+];
+
+function renderProcesses(procs) {
+  const grid = document.getElementById('proc-grid');
+  grid.innerHTML = '';
+  procs.forEach((p, i) => {
+    const c = PROC_COLORS[i % PROC_COLORS.length];
+    const card = document.createElement('div');
+    card.className = 'proc-card';
+    card.id = 'proc-' + p.pid;
+    card.style.cssText = `background:${c.bg};border-color:${c.border};`;
+    card.onclick = () => toggleProc(p.pid, card);
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:6px;">
+        <div class="proc-name" style="color:${c.text};min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</div>
+        <div style="font-size:10px;background:${c.bg};color:${c.text};border:1.5px solid ${c.border};
+          border-radius:99px;padding:2px 7px;font-weight:800;flex-shrink:0;white-space:nowrap;">PID ${p.pid}</div>
+      </div>
+      <div class="proc-meta" style="color:${c.text}">
+        RAM ${p.mem_mb} Mo &nbsp;·&nbsp; CPU ${p.cpu}%
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function toggleProc(pid, card) {
+  if (selectedPIDs.has(pid)) { selectedPIDs.delete(pid); card.classList.remove('selected'); }
+  else { selectedPIDs.add(pid); card.classList.add('selected'); }
+}
+
+async function killSelected() {
+  if (!selectedPIDs.size) { toast('⚠ Sélectionne des processus d\'abord'); return; }
+  if (!confirm(`Arrêter ${selectedPIDs.size} processus ?`)) return;
+
+  for (const pid of selectedPIDs) {
+    const res  = await fetch(API + '/api/kill/' + pid);
+    const data = await res.json();
+    log(data.message, data.ok ? 'success' : 'error');
+    if (data.ok) {
+      const card = document.getElementById('proc-' + pid);
+      if (card) card.classList.add('dead');
+    }
+  }
+  selectedPIDs.clear();
+}
+
+// ── DISK CHART ────────────────────────────────────────────────────────────────
+function renderDiskChart(disk, scan) {
+  const labels = [];
+  const values = [];
+  Object.values(scan).forEach(v => {
+    if (v.size_bytes > 0) {
+      labels.push(v.label);
+      values.push(+(v.size_bytes / 1e9).toFixed(2));
+    }
+  });
+  const rest = +((disk.used_gb - values.reduce((a,b) => a+b, 0))).toFixed(1);
+  if (rest > 0) { labels.push('Autres fichiers'); values.push(rest); }
+  labels.push('Libre'); values.push(disk.free_gb);
+
+  const legend = document.getElementById('disk-legend');
+  legend.innerHTML = '';
+  labels.forEach((l, i) => {
+    const span = document.createElement('span');
+    span.style.cssText = 'display:flex;align-items:center;gap:4px;';
+    span.innerHTML = `<span class="legend-dot" style="background:${CHART_COLORS[i % CHART_COLORS.length]}"></span>${l} ${values[i]} Go`;
+    legend.appendChild(span);
+  });
+
+  if (diskChart) diskChart.destroy();
+  const ctx = document.getElementById('diskChart').getContext('2d');
+  diskChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: CHART_COLORS,
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 10,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} Go` } }
+      }
+    }
+  });
+}
+
+// Restaurer le dernier scan au chargement
+(function restoreLastScan() {
+  const saved = loadScanState();
+  if (!saved) return;
+  scanData = saved.scan;
+  updateSysCards(saved.sys);
+  renderCleanRows(scanData);
+  renderProcesses(saved.sys.processes);
+  renderDiskChart(saved.sys.disk, scanData);
+  const total = Object.values(scanData).reduce((s, v) => s + (v.size_bytes || 0), 0);
+  document.getElementById('to-clean').textContent = human(total);
+  document.getElementById('clean-info').textContent = 'identifiés à nettoyer';
+  document.getElementById('clean-bar').style.width = Math.min(100, total / (saved.sys.disk.total_gb * 1e9) * 100 * 8) + '%';
+  document.getElementById('last-scan').textContent = `Dernier scan : ${saved.time} (restauré)`;
+})();
+
+// Détection OS au chargement
+(async function loadPlatform() {
+  try {
+    const res  = await fetch(API + '/api/platform');
+    const data = await res.json();
+    const icons = { Darwin:'🍎', Linux:'🐧', Windows:'🪟' };
+    const badge = document.getElementById('os-badge');
+    badge.textContent = (icons[data.os] || '💻') + ' ' + data.os_label + ' · ' + data.node;
+  } catch(_) {
+    document.getElementById('os-badge').textContent = '💻 OS inconnu';
+  }
+})();
+
+// Auto-refresh toutes les 30s
+setInterval(async () => {
+  try {
+    const res = await fetch(API + '/api/system');
+    const sys = await res.json();
+    updateSysCards(sys);
+  } catch(_) {}
+}, 30000);
+</script>
+</body>
+</html>
